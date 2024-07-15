@@ -1,17 +1,27 @@
 import random
 import heapq
+import sys
 import pygame
 import numpy as np
 
 from src.buttons import Buttons
+n = 100000
+sys.setrecursionlimit(n)
 
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+PURPLE = (128, 0, 128)
+ORANGE = (255, 165, 0)
 
 class GUI:
     def __init__(self, cell_size=15):
         self.screen = pygame.display.get_surface()
         self.width = self.screen.get_width()
         self.height = self.screen.get_height()
-        self.background = (255, 255, 255)
+        self.background = WHITE
         
         # Grid
         self.cell_size = cell_size
@@ -22,10 +32,13 @@ class GUI:
         
         # Buttons
         self.buttons = Buttons(height=self.shift)
-        self.n_buttons = 3
+        self.n_buttons = 5
+        
         self.buttons.add_button(x=0, y=0, width=self.width//self.n_buttons, height=self.shift, text="Generate", color=(0, 255, 0), function=self.generate)
         self.buttons.add_button(x=self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Solve", color=(255, 0, 0), function=self.solve)
-        self.buttons.add_button(x=2*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear", color=(0, 0, 255), function=self.clear)
+        self.buttons.add_button(x=2*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear path", color=(0, 0, 255), function=self.clear_path)
+        self.buttons.add_button(x=3*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear walls", color=(0, 0, 255), function=self.clear_walls)
+        self.buttons.add_button(x=4*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear all", color=(0, 0, 255), function=self.clear)
 
         # A star
         self.solution_path = []
@@ -38,13 +51,37 @@ class GUI:
         self.current_path_drawn = 0
         self.current_explored_drawn = 0
 
+    def clear_walls(self):
+        # clear walls but keep start and goal
+        for i in range(self.grid_width):
+            for j in range(self.grid_height):
+                if self.grid[i, j] == 1:
+                    self.grid[i, j] = 0
     def solve(self):
         if self.start and self.goal:
-            print("Solving")
+            
             self.solution_path = self.a_star_search(self.start, self.goal)
-            print(self.explored)
+            
         else:
             print("Start or goal not set.")
+
+    def clear_path(self):
+        self.solution_path = []
+        self.explored = []
+        self.current_path_drawn = 0
+        self.current_explored_drawn = 0
+        self.start = None
+        self.goal = None
+
+    def clear(self):
+        print("Clearing")
+        self.grid = np.zeros((self.grid_width, self.grid_height))
+        self.solution_path = []
+        self.start = None
+        self.goal = None
+        self.explored = []
+        self.current_path_drawn = 0
+        self.current_explored_drawn = 0
         
     def heuristic(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -94,52 +131,44 @@ class GUI:
     
     def generate(self):
         self.generate_maze()
-    
-    def clear(self):
-        print("Clearing")
-        self.grid = np.zeros((self.grid_width, self.grid_height))
-        self.solution_path = []
-        self.start = None
-        self.goal = None
 
     
     def draw_grid(self):
         for i in range(self.grid_width):
             for j in range(self.grid_height):
                 if self.grid[i, j] == 1:
-                    pygame.draw.rect(self.screen, (0, 0, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
+                    pygame.draw.rect(self.screen, BLACK, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
                 else:
                     #print(i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size)
-                    pygame.draw.rect(self.screen, (0, 0, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size), 1)
+                    pygame.draw.rect(self.screen, BLACK, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size), 1)
 
     def draw_path(self):
         if self.current_path_drawn < len(self.solution_path):
             for i, j in self.solution_path[:self.current_path_drawn]:
-                pygame.draw.rect(self.screen, (0, 255, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
+                pygame.draw.rect(self.screen, GREEN, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
             self.current_path_drawn += 1
             pygame.time.wait(int(self.animated_speed*1000))
         else:
             for i, j in self.solution_path:
-                pygame.draw.rect(self.screen, (0, 255, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
+                pygame.draw.rect(self.screen, GREEN, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
         
-
 
     def draw_explored(self):
 
         if self.current_explored_drawn < len(self.explored):
             for i, j in self.explored[:self.current_explored_drawn]:
-                pygame.draw.rect(self.screen, (255, 0, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
+                pygame.draw.rect(self.screen, RED, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
             self.current_explored_drawn += 1
             pygame.time.wait(int(self.animated_speed*1000))
         else:
             for i, j in self.explored:
-                pygame.draw.rect(self.screen, (255, 0, 0), (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
+                pygame.draw.rect(self.screen, RED, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
     
     def draw_start_goal(self):
         if self.start is not None:
-            pygame.draw.rect(self.screen, (0, 0, 255), (self.start[0]*self.cell_size, self.start[1]*self.cell_size+self.shift, self.cell_size, self.cell_size))
+            pygame.draw.rect(self.screen, ORANGE, (self.start[0]*self.cell_size, self.start[1]*self.cell_size+self.shift, self.cell_size, self.cell_size))
         if self.goal is not None:
-            pygame.draw.rect(self.screen, (0, 0, 255), (self.goal[0]*self.cell_size, self.goal[1]*self.cell_size+self.shift, self.cell_size, self.cell_size))
+            pygame.draw.rect(self.screen, PURPLE, (self.goal[0]*self.cell_size, self.goal[1]*self.cell_size+self.shift, self.cell_size, self.cell_size))
     
     def draw(self):
         self.screen.fill(self.background)
@@ -156,6 +185,7 @@ class GUI:
     def generate_maze(self):
         self.grid = np.zeros((self.grid_height, self.grid_width))
 
+        
         stack = [(0, 0)]
         visited = set()
         directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
@@ -165,34 +195,72 @@ class GUI:
             visited.add((x, y))
             self.grid[x, y] = 1
 
-            neighbors = [(x+dx, y+dy) for dx, dy in directions if 0 <= x+dx < self.grid_height and 0 <= y+dy < self.grid_width and (x+dx, y+dy) not in visited]
+            neighbors = [(x + dx, y + dy) for dx, dy in directions if 0 <= x + dx < self.grid_height and 0 <= y + dy < self.grid_width and (x + dx, y + dy) not in visited]
 
             if neighbors:
                 nx, ny = random.choice(neighbors)
                 stack.append((nx, ny))
                 self.grid[nx, ny] = 1
-                self.grid[(x+nx)//2, (y+ny)//2] = 1
+                self.grid[(x + nx) // 2, (y + ny) // 2] = 1
             else:
                 stack.pop()
 
+    
+
+    def handle_left_click(self, pos):
+        x, y = pos[0] // self.cell_size, (pos[1] - self.shift) // self.cell_size
+        if self.grid[x, y] == 0:
+            if self.start is None:
+                self.start = (x, y)
+                self.grid[x, y] = 2
+            elif self.goal is None:
+                self.goal = (x, y)
+                self.grid[x, y] = 3
+            else:
+                self.grid[x, y] = 1
+
+    def handle_right_click(self, pos):
+        x, y = pos[0] // self.cell_size, (pos[1] - self.shift) // self.cell_size
+        if self.grid[x, y] in {1, 2, 3}:
+            self.grid[x, y] = 0
+            if (x, y) == self.start:
+                self.start = None
+            elif (x, y) == self.goal:
+                self.goal = None
+
+
     def run(self):
         run = True
+        drawing = False
+        erasing = False
+
         while run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    self.buttons.check_click(pos)
                     if pos[1] > self.shift:
-                        x,y = pos[0]//self.cell_size, (pos[1]-self.shift)//self.cell_size
-                        if self.grid[x, y] == 0:
-                            if self.start is None:
-                                self.start = (x, y)
-                                self.grid[x, y] = 2
-                            elif self.goal is None:
-                                self.goal = (x, y)
-                                self.grid[x, y] = 3
+                        if event.button == 1:  # Left click
+                            if not self.start or not self.goal:
+                                self.handle_left_click(pos)
                             else:
-                                self.grid[x, y] = 1
+                                drawing = True
+                                self.handle_left_click(pos)
+                        elif event.button == 3:  # Right click
+                            erasing = True
+                            self.handle_right_click(pos)
+                    self.buttons.check_click(pos)
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:  # Left click
+                        drawing = False
+                    if event.button == 3:  # Right click
+                        erasing = False
+                if event.type == pygame.MOUSEMOTION:
+                    pos = pygame.mouse.get_pos()
+                    if pos[1] > self.shift:
+                        if drawing:
+                            self.handle_left_click(pos)
+                        if erasing:
+                            self.handle_right_click(pos)
             self.draw()

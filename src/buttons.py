@@ -18,6 +18,7 @@ class Buttons:
         
 
     def add_button(self, x, y, width, height, text, color, function):
+        
         self.buttons.append(pygame.Rect(x, y, width, height))
         text = self.font.render(text, True, (0, 0, 0))
         text_width, text_height = text.get_size()
@@ -30,7 +31,7 @@ class Buttons:
 
     def draw(self):
         for button, (text, color, pos) in zip(self.buttons, self.button_texts):
-
+            
             if self.animations[self.buttons.index(button)] > 0:
                 self.animations[self.buttons.index(button)] += 1
                 color_to_use = self.animated_colors[self.buttons.index(button)]
@@ -39,6 +40,8 @@ class Buttons:
                 pygame.draw.rect(self.screen, color_to_use, button)
             else:
                 pygame.draw.rect(self.screen, color, button)
+            # draw black border
+            pygame.draw.rect(self.screen, (0, 0, 0), button, 1)
             self.screen.blit(text, pos)
 
     def darken_color(self, color):
