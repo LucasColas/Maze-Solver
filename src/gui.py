@@ -1,5 +1,6 @@
-import pygame
+import random
 
+import pygame
 import numpy as np
 
 from src.buttons import Buttons
@@ -28,7 +29,7 @@ class GUI:
         print("Solving")
     
     def generate(self):
-        print("Generating")
+        self.generate_maze()
     
     def clear(self):
         print("Clearing")
@@ -50,6 +51,29 @@ class GUI:
         self.draw_grid()
         self.buttons.draw()
         pygame.display.flip()
+
+    def generate_maze(self):
+        self.grid = np.zeros((self.grid_height, self.grid_width))
+
+        stack = [(0, 0)]
+        visited = set()
+        directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
+
+        while stack:
+            x, y = stack[-1]
+            visited.add((x, y))
+            self.grid[x, y] = 1
+
+            neighbors = [(x+dx, y+dy) for dx, dy in directions if 0 <= x+dx < self.grid_height and 0 <= y+dy < self.grid_width and (x+dx, y+dy) not in visited]
+
+            if neighbors:
+                nx, ny = random.choice(neighbors)
+                stack.append((nx, ny))
+                self.grid[nx, ny] = 1
+                self.grid[(x+nx)//2, (y+ny)//2] = 1
+            else:
+                stack.pop()
+
     def run(self):
         run = True
         while run:
