@@ -151,7 +151,7 @@ class GUI:
                 if self.grid[ny, nx] == 1:  # if the next cell is a wall
                     # Remove the wall between the current and next cell
                     self.grid[y + dy, x + dx] = 0
-                    self.dfs(nx, ny)  # Recursively call DFS from the next cell
+                    self._dfs(nx, ny)  # Recursively call DFS from the next cell
 
     def _generate_maze(self):
         self.grid = np.zeros((self.grid_height, self.grid_width))
