@@ -1,6 +1,5 @@
 import pygame
 
-
 class Buttons:
     def __init__(self, height=200):
         self.screen = pygame.display.get_surface()
@@ -26,10 +25,12 @@ class Buttons:
         self.button_texts.append((text, color, pos))
         self.functions.append(function)
         self.colors.append(color)
-        self.animated_colors.append(self.darken_color(color))
+        self.animated_colors.append(self.darken_color(color)) 
         self.animations.append(0)
 
     def draw(self):
+        
+        
         for button, (text, color, pos) in zip(self.buttons, self.button_texts):
             
             if self.animations[self.buttons.index(button)] > 0:
@@ -49,7 +50,6 @@ class Buttons:
 
     def animate_button(self, button):
         self.animations[self.buttons.index(button)] = 1
-        
         
 
     def check_click(self, pos):

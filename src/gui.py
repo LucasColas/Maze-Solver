@@ -31,11 +31,11 @@ class GUI:
         self.buttons = Buttons(height=self.shift)
         self.n_buttons = 5
         
-        self.buttons.add_button(x=0, y=0, width=self.width//self.n_buttons, height=self.shift, text="Generate", color=(0, 255, 0), function=self.generate)
-        self.buttons.add_button(x=self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Solve", color=(255, 0, 0), function=self.solve)
-        self.buttons.add_button(x=2*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear path", color=(0, 0, 255), function=self.clear_path)
-        self.buttons.add_button(x=3*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear walls", color=(0, 0, 255), function=self.clear_walls)
-        self.buttons.add_button(x=4*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear all", color=(0, 0, 255), function=self.clear)
+        self.buttons.add_button(x=0, y=0, width=self.width//self.n_buttons, height=self.shift, text="Generate", color=GREEN, function=self.generate)
+        self.buttons.add_button(x=self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Solve", color=RED, function=self.solve)
+        self.buttons.add_button(x=2*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear path", color=BLUE, function=self.clear_path)
+        self.buttons.add_button(x=3*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear walls", color=BLUE, function=self.clear_walls)
+        self.buttons.add_button(x=4*self.width//self.n_buttons, y=0, width=self.width//self.n_buttons, height=self.shift, text="Clear all", color=BLUE, function=self.clear)
 
         # A star
         self.solution_path = []
@@ -153,26 +153,7 @@ class GUI:
                     self.grid[y + dy, x + dx] = 0
                     self._dfs(nx, ny)  # Recursively call DFS from the next cell
 
-    def _generate_maze(self):
-        self.grid = np.zeros((self.grid_height, self.grid_width))
-        
-        stack = [(0, 0)]
-        visited = set()
-        directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
-
-        while stack:
-            x, y = stack[-1]
-            visited.add((x, y))
-            neighbors = [(x+dx, y+dy) for dx, dy in directions if 0 <= x+dx < self.grid_width and 0 <= y+dy < self.grid_height]
-            unvisited_neighbors = [neighbor for neighbor in neighbors if neighbor not in visited]
-            if unvisited_neighbors:
-                next_x, next_y = random.choice(unvisited_neighbors)
-                self.grid[(x+next_x)//2, (y+next_y)//2] = 1
-                self.grid[next_x, next_y] = 1
-                stack.append((next_x, next_y))
-            else:
-                stack.pop()
-
+    
     
     def draw_grid(self):
         for i in range(self.grid_width):
@@ -201,6 +182,7 @@ class GUI:
                 pygame.draw.rect(self.screen, RED, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
             self.current_explored_drawn += 1
             pygame.time.wait(int(self.animated_speed*1000))
+
         else:
             for i, j in self.explored:
                 pygame.draw.rect(self.screen, RED, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
@@ -268,12 +250,15 @@ class GUI:
                         elif event.button == 3:  # Right click
                             erasing = True
                             self.handle_right_click(pos)
+
                     self.buttons.check_click(pos)
+
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:  # Left click
                         drawing = False
                     if event.button == 3:  # Right click
                         erasing = False
+                        
                 if event.type == pygame.MOUSEMOTION:
                     pos = pygame.mouse.get_pos()
                     if pos[1] > self.shift:
