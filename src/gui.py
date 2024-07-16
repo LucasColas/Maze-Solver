@@ -1,12 +1,9 @@
 import random
 import heapq
-import sys
 import pygame
 import numpy as np
 
 from src.buttons import Buttons
-n = 100000
-sys.setrecursionlimit(n)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -57,6 +54,8 @@ class GUI:
             for j in range(self.grid_height):
                 if self.grid[i, j] == 1:
                     self.grid[i, j] = 0
+
+
     def solve(self):
         if self.start and self.goal:
             
@@ -66,6 +65,7 @@ class GUI:
             print("Start or goal not set.")
 
     def clear_path(self):
+        # clear everything but the walls
         self.solution_path = []
         self.explored = []
         self.current_path_drawn = 0
@@ -74,6 +74,7 @@ class GUI:
         self.goal = None
 
     def clear(self):
+        # clear everything
         print("Clearing")
         self.grid = np.zeros((self.grid_width, self.grid_height))
         self.solution_path = []
@@ -91,8 +92,8 @@ class GUI:
         open_set = []
         heapq.heappush(open_set, (0, start))
         came_from = {}
-        g_score = {start: 0}
-        f_score = {start: self.heuristic(start, goal)}
+        g_score = {start: 0} # cost from start to current node
+        f_score = {start: self.heuristic(start, goal)} # heuristic cost from start to goal through current node
         visited = set()
 
 
@@ -114,23 +115,47 @@ class GUI:
                 if 0 <= neighbor[0] < self.grid_width and 0 <= neighbor[1] < self.grid_height:
                     if self.grid[neighbor[0], neighbor[1]] == 1 or neighbor in visited:
                         continue
+                    
                     tentative_g_score = g_score[current] + 1
 
+                    # only updates the path to a neighbor if it has found a shorter path (lower g_score) than previously known, 
+                    # or if the neighbor has not been evaluated yet (not in g_score).
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                        came_from[neighbor] = current
+                        came_from[neighbor] = current # path to neighbor
+                        # update g_score and f_score
                         g_score[neighbor] = tentative_g_score
                         f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
                         heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
             self.explored.append(current)
 
-
-
-
         return []
     
     def generate(self):
-        self.generate_maze()
+        self._generate_maze()
+
+    def _generate_maze(self):
+        self.grid = np.zeros((self.grid_height, self.grid_width))
+        
+        stack = [(0, 0)]
+        visited = set()
+        directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
+
+        while stack:
+            x, y = stack[-1]
+            visited.add((x, y))
+            self.grid[x, y] = 1
+
+            neighbors = [(x + dx, y + dy) for dx, dy in directions if 0 <= x + dx < self.grid_height and 0 <= y + dy < self.grid_width and (x + dx, y + dy) not in visited]
+
+            if neighbors:
+                nx, ny = random.choice(neighbors)
+                stack.append((nx, ny))
+                self.grid[nx, ny] = 1 
+                print(nx, ny, (x + nx) // 2, (y + ny) // 2)
+                self.grid[(x + nx) // 2, (y + ny) // 2] = 1 
+            else:
+                stack.pop()
 
     
     def draw_grid(self):
@@ -139,7 +164,7 @@ class GUI:
                 if self.grid[i, j] == 1:
                     pygame.draw.rect(self.screen, BLACK, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size))
                 else:
-                    #print(i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size)
+                    
                     pygame.draw.rect(self.screen, BLACK, (i*self.cell_size, j*self.cell_size+self.shift, self.cell_size, self.cell_size), 1)
 
     def draw_path(self):
@@ -174,36 +199,13 @@ class GUI:
         self.screen.fill(self.background)
         self.draw_grid()
         self.buttons.draw()
-        #if self.current_path_drawn < len(self.solution_path):
-            #self.draw_explored(self.solution_path)
         self.draw_explored()
         if self.current_explored_drawn == len(self.explored):
             self.draw_path()
         self.draw_start_goal()
         pygame.display.flip()
 
-    def generate_maze(self):
-        self.grid = np.zeros((self.grid_height, self.grid_width))
-
-        
-        stack = [(0, 0)]
-        visited = set()
-        directions = [(0, 2), (2, 0), (0, -2), (-2, 0)]
-
-        while stack:
-            x, y = stack[-1]
-            visited.add((x, y))
-            self.grid[x, y] = 1
-
-            neighbors = [(x + dx, y + dy) for dx, dy in directions if 0 <= x + dx < self.grid_height and 0 <= y + dy < self.grid_width and (x + dx, y + dy) not in visited]
-
-            if neighbors:
-                nx, ny = random.choice(neighbors)
-                stack.append((nx, ny))
-                self.grid[nx, ny] = 1
-                self.grid[(x + nx) // 2, (y + ny) // 2] = 1
-            else:
-                stack.pop()
+    
 
     
 
