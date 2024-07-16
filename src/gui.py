@@ -132,7 +132,26 @@ class GUI:
         return []
     
     def generate(self):
-        self._generate_maze()
+        self.grid = np.ones((self.grid_width, self.grid_height)) # initialize grid with walls
+        self._dfs(0,0)
+        print("Maze generated")
+
+    def _dfs(self, x, y):
+        # Mark the current cell as part of the path (remove wall)
+        self.grid[y, x] = 0
+
+        # Define the order of movements (right, down, left, up)
+        directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        np.random.shuffle(directions) 
+
+        # Explore each direction
+        for dx, dy in directions:
+            nx, ny = x + 2 * dx, y + 2 * dy  
+            if 0 <= nx < self.grid_width and 0 <= ny < self.grid_height:
+                if self.grid[ny, nx] == 1:  # if the next cell is a wall
+                    # Remove the wall between the current and next cell
+                    self.grid[y + dy, x + dx] = 0
+                    self.dfs(nx, ny)  # Recursively call DFS from the next cell
 
     def _generate_maze(self):
         self.grid = np.zeros((self.grid_height, self.grid_width))
@@ -144,16 +163,13 @@ class GUI:
         while stack:
             x, y = stack[-1]
             visited.add((x, y))
-            self.grid[x, y] = 1
-
-            neighbors = [(x + dx, y + dy) for dx, dy in directions if 0 <= x + dx < self.grid_height and 0 <= y + dy < self.grid_width and (x + dx, y + dy) not in visited]
-
-            if neighbors:
-                nx, ny = random.choice(neighbors)
-                stack.append((nx, ny))
-                self.grid[nx, ny] = 1 
-                print(nx, ny, (x + nx) // 2, (y + ny) // 2)
-                self.grid[(x + nx) // 2, (y + ny) // 2] = 1 
+            neighbors = [(x+dx, y+dy) for dx, dy in directions if 0 <= x+dx < self.grid_width and 0 <= y+dy < self.grid_height]
+            unvisited_neighbors = [neighbor for neighbor in neighbors if neighbor not in visited]
+            if unvisited_neighbors:
+                next_x, next_y = random.choice(unvisited_neighbors)
+                self.grid[(x+next_x)//2, (y+next_y)//2] = 1
+                self.grid[next_x, next_y] = 1
+                stack.append((next_x, next_y))
             else:
                 stack.pop()
 
