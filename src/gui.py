@@ -118,10 +118,9 @@ class GUI:
                     
                     tentative_g_score = g_score[current] + 1
 
-                    # only updates the path to a neighbor if it has found a shorter path (lower g_score) than previously known, 
-                    # or if the neighbor has not been evaluated yet (not in g_score).
+
                     if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
-                        came_from[neighbor] = current # path to neighbor
+                        came_from[neighbor] = current 
                         # update g_score and f_score
                         g_score[neighbor] = tentative_g_score
                         f_score[neighbor] = tentative_g_score + self.heuristic(neighbor, goal)
