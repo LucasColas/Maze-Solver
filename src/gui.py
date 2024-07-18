@@ -209,6 +209,7 @@ class GUI:
 
     def handle_left_click(self, pos):
         x, y = pos[0] // self.cell_size, (pos[1] - self.shift) // self.cell_size
+        
         if self.grid[x, y] == 0:
             if self.start is None:
                 self.start = (x, y)
