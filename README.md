@@ -1,6 +1,5 @@
 # Maze-Solver
 
-# Tetris
 Maze solver and pathfinding visualizer made with python + pygame !
 
 <img src="https://github.com/LucasColas/Maze-Solver/blob/main/img/img1.png" width=30% height=30%>
