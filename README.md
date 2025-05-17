@@ -2,7 +2,7 @@
 
 Maze solver and pathfinding visualizer made with python + pygame !
 
-<img src="https://github.com/LucasColas/Maze-Solver/blob/main/img/img1.png" width=30% height=30%>
+<img src="https://github.com/LucasColas/Maze-Solver/blob/main/img/img1.png" width=50% height=50%>
 
 ## Prerequisites 
 * [Python >= 3.10](https://www.python.org/)
